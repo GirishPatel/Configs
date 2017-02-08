@@ -1,0 +1,8 @@
+set hls
+set ssop-=options    " do not store global and local values in a session
+set ssop-=folds      " do not store folds
+set et
+set ts=4
+set nu
+set nowrap
+syntax on

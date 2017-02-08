@@ -1,0 +1,118 @@
+# Disable apple press and hold feature, this will enable vim repeat key
+# defaults write -g ApplePressAndHoldEnabled -bool false
+
+export RPROMPT='[%?]'
+
+alias sumn="'awk '{s+=\$1} END {print s}'"
+
+function hosts {
+    grep $1 /etc/hosts
+}
+
+alias now='date "+%d%m%Y%H%M%S"'
+
+# vim mode
+#bindkey -v
+#export KEYTIMEOUT=1
+#---------
+
+alias ll='ls -l'
+
+function tmuxr {
+    tmux-session restore
+    tmux a
+}
+
+function swap {
+  mv $1 $1._tmp
+  mv $2 $1
+  mv $1._tmp $2
+}
+
+function notify {
+  title=$1
+  subtitle=$2
+  shift
+  shift
+  message=$@
+
+  osascript -e "display notification \"$message\" with title \"$title\" subtitle \"$subtitle\" sound name \"Bottle\""
+}
+
+function msg {
+  title=$1
+  subtitle=$2
+  shift
+  shift
+  message=$@
+
+  afplay -v 2 /System/Library/Sounds/Bottle.aiff &
+  osascript -e "tell app \"System Events\" to display alert \"$title\" message \"$subtitle\n$message\"" &> /dev/null 
+}
+
+function gitbranch {
+  for k in `git branch -a|perl -pe s/^..//`;
+  do
+    echo -e `git show --pretty=format:"%Cgreen%ci %Cblue%cr%Creset" $k|head -n 1`\\t$k;
+  done | sort -r
+}
+
+dateS=$(date +"%s")
+cmd=''
+
+function precmd {
+  s=$?
+  dateE=$(date +"%s")
+  diffT=$(($dateE-$dateS))
+
+  min=$(echo $diffT / 60 | bc)
+  sec=$(echo $diffT - $min \* 60 | bc)
+  hr=$(echo $min / 60 | bc) 
+  min=$(echo $min - $hr \* 60 | bc) 
+
+  if [[ $hr -eq 0 ]] ; then
+    if [[ $min -eq 0 ]] ; then
+      tm="$sec sec"
+    else
+      tm="$min:$sec"
+    fi
+  else
+    tm="$hr:$min:$sec"
+  fi
+
+  if [[ $s -eq 0 ]] ; then
+    smile=':-)' # '\U263A'
+  else
+    smile=':-('
+  fi
+
+  if [[ $cmd != '' ]]; then
+    export RPROMPT='[%?]'"[$tm]"
+    if [[ $diffT -gt 5 ]] ; then
+      case $cmd in
+        (vim*|tail?-f*|*diff*|ssh*|man*|script*|bash*|ceryx*)
+          notify $cmd "Completed ${smile}" "Status: $s\\nTime: $tm";;
+        (*)
+          notify $cmd "Completed ${smile}" "Status: $s\\nTime: $tm";;
+      esac
+    fi
+  else
+    export RPROMPT='[%?]'
+  fi
+
+  cmd=''
+}
+
+function preexec {
+  cmd=$1
+  dateS=$(date +"%s")
+}
+
+function start_logging {
+  LOG_FILE=~/.terminal_logs/terminal.`/bin/date "+%Y-%m-%d_%H:%M:%S"`$FORMATTED_DATE.log
+  if [[ ! -a $LOG_FILE ]]; then
+    /usr/bin/script $LOG_FILE
+  fi
+}
+
+
