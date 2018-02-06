@@ -7,6 +7,7 @@ then
     mkdir -p ~/backups
     cp ~/.zshrc ~/backups/zshrc 
     echo -e source `pwd`/$config_folder/zsh_profile "\n" >> ~/.zshrc
+    echo -e source `pwd`/$config_folder/zsh_vimode "\n" >> ~/.zshrc
 fi
 
 ln -s `pwd`/$config_folder/vimrc ~/.vimrc
