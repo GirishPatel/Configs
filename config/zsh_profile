@@ -2,8 +2,17 @@
 # defaults write -g ApplePressAndHoldEnabled -bool false
 
 export RPROMPT='[%?]'
+export PROMPT=`echo $PROMPT | sed 's/${ret_status}/${ret_status} %*/'`
 
 alias sumn="'awk '{s+=\$1} END {print s}'"
+
+alias o=osascript
+alias cs='open https://github.com/robbyrussell/oh-my-zsh/wiki/Cheatsheet'
+
+alias gen_hosts="sed 's/#.*//' /etc/hosts | grep -o '\S\+' | grep -e '[0-9]' -e '-' | sort"
+
+# Support regex specified here - http://zsh.sourceforge.net/Doc/Release/Expansion.html#Filename-Generation
+bindkey '^R' history-incremental-pattern-search-backward
 
 function hosts {
     grep $1 /etc/hosts
@@ -16,7 +25,7 @@ alias now='date "+%d%m%Y%H%M%S"'
 #export KEYTIMEOUT=1
 #---------
 
-alias ll='ls -l'
+alias ll='ls -ltrh'
 
 function tmuxr {
     tmux-session restore
@@ -81,9 +90,9 @@ function precmd {
   fi
 
   if [[ $s -eq 0 ]] ; then
-    smile=':-)' # '\U263A'
+    smile='😀' # '\U263A'
   else
-    smile=':-('
+    smile='😟'
   fi
 
   if [[ $cmd != '' ]]; then
@@ -115,4 +124,31 @@ function start_logging {
   fi
 }
 
+function check_site {
+    website=$1
+    count=$2
+    timeout=$3
+
+    if [[ -z $website ]]; then
+        echo "Usage: $0 <ping_count> <ping_timeout> <website>"
+        exit 1
+    fi
+
+    count=${count:-1}
+    timeout=${timeout:-1}
+
+    ping -c $count -t $timeout $website > /dev/null
+    s=$?
+    if [[ $s -eq 0 ]]; then
+        msg "$website working"
+    fi
+    return $s
+}
+
+function check_site_until_success {
+    website=$1
+    while ! check_site $website; do
+        sleep 60
+    done
+}
 
