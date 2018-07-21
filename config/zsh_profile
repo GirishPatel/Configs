@@ -6,7 +6,7 @@ export PROMPT=`echo $PROMPT | sed 's/${ret_status}/${ret_status} %*/'`
 
 alias sumn="'awk '{s+=\$1} END {print s}'"
 
-alias o=osascript
+# alias o=osascript
 alias cs='open https://github.com/robbyrussell/oh-my-zsh/wiki/Cheatsheet'
 
 alias gen_hosts="sed 's/#.*//' /etc/hosts | grep -o '\S\+' | grep -e '[0-9]' -e '-' | sort"
@@ -40,12 +40,23 @@ function swap {
 
 function notify {
   title=$1
-  subtitle=$2
+  icon=$2
+  subtitle=$3
+  shift
   shift
   shift
   message=$@
 
-  osascript -e "display notification \"$message\" with title \"$title\" subtitle \"$subtitle\" sound name \"Bottle\""
+  # this is intentional to have multiline
+  title="$title
+$subtitle"
+
+  if [[ -z $icon ]]; then
+    notify-send -t 3000 "$title" "$message"
+  else
+    notify-send -t 3000 -i ~/Images/Icons/$icon.png "$title" "$message"
+  fi
+  #osascript -e "display notification \"$message\" with title \"$title\" subtitle \"$subtitle\" sound name \"Bottle\""
 }
 
 function msg {
@@ -55,8 +66,9 @@ function msg {
   shift
   message=$@
 
-  afplay -v 2 /System/Library/Sounds/Bottle.aiff &
-  osascript -e "tell app \"System Events\" to display alert \"$title\" message \"$subtitle\n$message\"" &> /dev/null 
+  notify "$title" "$subtitle" "$message"
+  #afplay -v 2 /System/Library/Sounds/Bottle.aiff &
+  #osascript -e "tell app \"System Events\" to display alert \"$title\" message \"$subtitle\n$message\"" &> /dev/null 
 }
 
 function gitbranch {
@@ -90,19 +102,19 @@ function precmd {
   fi
 
   if [[ $s -eq 0 ]] ; then
-    smile='😀' # '\U263A'
+    smile=happy # '😀' # '\U263A'
   else
-    smile='😟'
+    smile=sad #'😟'
   fi
 
   if [[ $cmd != '' ]]; then
     export RPROMPT='[%?]'"[$tm]"
     if [[ $diffT -gt 5 ]] ; then
-      case $cmd in
-        (vim*|tail?-f*|*diff*|ssh*|man*|script*|bash*|ceryx*)
-          notify $cmd "Completed ${smile}" "Status: $s\\nTime: $tm";;
+      case "$cmd" in
+        (vim*|tail?-f*|*diff*|ssh*|man*|script*|bash*)
+          notify $cmd "$smile" "Completed" "Status: $s\\nTime: $tm";;
         (*)
-          notify $cmd "Completed ${smile}" "Status: $s\\nTime: $tm";;
+          notify $cmd "$smile" "Completed" "Status: $s\\nTime: $tm";;
       esac
     fi
   else
