@@ -11,6 +11,8 @@ alias cs='open https://github.com/robbyrussell/oh-my-zsh/wiki/Cheatsheet'
 
 alias gen_hosts="sed 's/#.*//' /etc/hosts | grep -o '\S\+' | grep -e '[0-9]' -e '-' | sort"
 
+alias obsidian='cd ~"/Library/CloudStorage/GoogleDrive-girishpatel.bits@gmail.com/My Drive/Personal/Personal - Obsidian Vault"'
+
 # Support regex specified here - http://zsh.sourceforge.net/Doc/Release/Expansion.html#Filename-Generation
 bindkey '^R' history-incremental-pattern-search-backward
 
